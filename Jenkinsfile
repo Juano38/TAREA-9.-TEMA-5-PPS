@@ -2,6 +2,13 @@ groovy
 pipeline {
 agent any
 stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', // <- aquí va la rama correcta
+                    credentialsId: 'fec5c479-4745-4666-a6ad-898fdbd2c582',
+                    url: 'https://github.com/Juano38/TAREA-9.-TEMA-5-PPS.git'
+            }
+        }
 stage('Build') {
 steps {
 sh 'python3 -m venv venv'
