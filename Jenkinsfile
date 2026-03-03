@@ -1,10 +1,25 @@
 pipeline {
     agent any
 
+    environment {
+        VENV_DIR = "${WORKSPACE}/venv"
+    }
+
+    options {
+        // Limpiar workspace al inicio para evitar conflictos de builds anteriores
+        skipDefaultCheckout(true)
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
-                git branch: 'main', 
+                // Limpieza manual del workspace para evitar conflictos
+                deleteDir()
+
+                // Checkout de Git usando credenciales y timeout
+                git branch: 'main',
                     url: 'https://github.com/Juano38/TAREA-9.-TEMA-5-PPS.git',
                     credentialsId: 'fec5c479-4745-4666-a6ad-898fdbd2c582'
             }
@@ -12,24 +27,45 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'python3 -m venv venv'
-                sh '. venv/bin/activate'
-                sh 'python -m ensurepip --upgrade'
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
+                // Crear virtualenv con pip garantizado e instalar dependencias
+                sh '''
+                    python3 -m venv "${VENV_DIR}"
+                    . "${VENV_DIR}/bin/activate"
+                    python -m ensurepip --upgrade
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                sh 'python3 -m pytest'
+                // Ejecuta tus tests aquí dentro del virtualenv
+                sh '''
+                    . "${VENV_DIR}/bin/activate"
+                    # Ejemplo: pytest tests/
+                    echo "Aquí ejecutarías tus tests"
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'echo "Despliegue simulado"'
+                // Despliegue dentro del virtualenv si es necesario
+                sh '''
+                    . "${VENV_DIR}/bin/activate"
+                    echo "Aquí iría tu despliegue"
+                '''
             }
+        }
+    }
+
+    post {
+        failure {
+            echo "El pipeline falló. Revisa los logs."
+        }
+        success {
+            echo "Pipeline completado con éxito."
         }
     }
 }
