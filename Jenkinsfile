@@ -14,6 +14,8 @@ pipeline {
             steps {
                 sh 'python3 -m venv venv'
                 sh '. venv/bin/activate'
+                sh 'python -m ensurepip --upgrade'
+                sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
             }
         }
