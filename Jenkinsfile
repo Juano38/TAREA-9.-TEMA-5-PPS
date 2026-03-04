@@ -29,11 +29,15 @@ pipeline {
             steps {
                 // Crear virtualenv con pip garantizado e instalar dependencias
                 sh '''
-                    python3 -m venv "${VENV_DIR}"
-                    . "${VENV_DIR}/bin/activate"
-                    python -m ensurepip --upgrade
-                    pip install --upgrade pip
-                    [ -f requirements.txt ] && pip install -r requirements.txt
+            python3 -m venv venv
+            . venv/bin/activate
+            # Actualizamos pip y solo instalamos si el archivo existe
+            pip install --upgrade pip
+            if [ -f requirements.txt ]; then
+                pip install -r requirements.txt
+            else
+                echo "Aviso: requirements.txt no encontrado, saltando instalación."
+            fi
                 '''
             }
         }
